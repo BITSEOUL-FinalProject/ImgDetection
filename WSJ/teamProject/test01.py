@@ -1,2 +1,1 @@
 from tensorflow.keras.applications import inception_resnet_v2
-dfd

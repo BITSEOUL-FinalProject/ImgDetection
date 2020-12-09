@@ -24,7 +24,7 @@ Training_Data, Labels = [], []
 
 def hamsu(cnt):
     print(cnt)
-    data_path = './teamProject/images3/'+str(cnt)+"/"
+    data_path = './WSJ/teamProject/images3/'+str(cnt)+"/"
 
     #faces폴더에 있는 파일 리스트 얻기 
     onlyfiles = [f for f in listdir(data_path) if isfile(join(data_path,f))]
@@ -59,9 +59,9 @@ from sklearn.model_selection import train_test_split
 x_train, x_test , y_train  , y_test = train_test_split(Training_Data , Labels , train_size=0.8,shuffle=True,random_state=12)
 x_val, x_test , y_val  , y_test = train_test_split(x_test , y_test , test_size=0.5, shuffle=True,random_state=12)
 
-x_train = x_train.reshape(x_train.shape[0],50,50,16)
-x_test = x_test.reshape(x_test.shape[0],50,50,16)
-x_val = x_val.reshape(x_val.shape[0],50,50,16)
+x_train = x_train.reshape(x_train.shape[0],100,100,4)
+x_test = x_test.reshape(x_test.shape[0],100,100,4)
+x_val = x_val.reshape(x_val.shape[0],100,100,4)
 
 print(x_train.shape)
 print(x_test.shape)
@@ -74,26 +74,64 @@ from tensorflow.keras.layers import Dense
 from tensorflow.keras.layers import Conv2D
 from tensorflow.keras.layers import MaxPooling2D
 from tensorflow.keras.layers import Flatten
-from tensorflow.keras.layers import Dropout
+from tensorflow.keras.layers import Dropout, ZeroPadding2D, Convolution2D
 
 model = Sequential()
 # model.add(Conv2D(10,(3,3),input_shape=(50,50,16),activation='relu')) 
 # model.add(Flatten())  
 # model.add(Dense(20,activation='relu'))  
 # model.add(Dense(10,activation='relu'))
-model.add(Conv2D(60,(3,3),input_shape=(50,50,16),activation='relu')) 
-model.add(Conv2D(50,(3,3),activation='relu'))     
-model.add(Dropout(0.2))
-model.add(MaxPooling2D(pool_size=2))   # pool_size default : 2     
-model.add(Conv2D(40,(3,3),activation='relu'))                      
-model.add(Conv2D(30,(3,3),activation='relu'))                      
-model.add(Dropout(0.2))                
-model.add(MaxPooling2D(pool_size=2))   # pool_size default : 2  
-model.add(Conv2D(20,(3,3),activation='relu')) 
-model.add(Dropout(0.2))
-model.add(Flatten())     
-model.add(Dense(10,activation='relu'))
-model.add(Dense(1,activation="sigmoid"))                       
+# model.add(Conv2D(60,(3,3),input_shape=(50,50,16),activation='relu')) 
+# model.add(Conv2D(50,(3,3),activation='relu'))     
+# model.add(Dropout(0.2))
+# model.add(MaxPooling2D(pool_size=2))   # pool_size default : 2     
+# model.add(Conv2D(40,(3,3),activation='relu'))                      
+# model.add(Conv2D(30,(3,3),activation='relu'))                      
+# model.add(Dropout(0.2))                
+# model.add(MaxPooling2D(pool_size=2))   # pool_size default : 2  
+# model.add(Conv2D(20,(3,3),activation='relu')) 
+# model.add(Dropout(0.2))
+# model.add(Flatten())     
+# model.add(Dense(10,activation='relu'))
+# model.add(Dense(1,activation="sigmoid"))            
+model.add(ZeroPadding2D((1,1),input_shape=(100, 100, 4)))
+model.add(Convolution2D(64, (3, 3), activation='relu'))
+model.add(ZeroPadding2D((1,1)))
+model.add(Convolution2D(64, (3, 3), activation='relu'))
+model.add(MaxPooling2D((2,2), strides=(2,2)))
+model.add(ZeroPadding2D((1,1)))
+model.add(Convolution2D(128, (3, 3), activation='relu'))
+model.add(ZeroPadding2D((1,1)))
+model.add(Convolution2D(128, (3, 3), activation='relu'))
+model.add(MaxPooling2D((2,2), strides=(2,2)))
+model.add(ZeroPadding2D((1,1)))
+model.add(Convolution2D(256, (3, 3), activation='relu'))
+model.add(ZeroPadding2D((1,1)))
+model.add(Convolution2D(256, (3, 3), activation='relu'))
+model.add(ZeroPadding2D((1,1)))
+model.add(Convolution2D(256, (3, 3), activation='relu'))
+model.add(MaxPooling2D((2,2), strides=(2,2)))
+model.add(ZeroPadding2D((1,1)))
+model.add(Convolution2D(512, (3, 3), activation='relu'))
+model.add(ZeroPadding2D((1,1)))
+model.add(Convolution2D(512, (3, 3), activation='relu'))
+model.add(ZeroPadding2D((1,1)))
+model.add(Convolution2D(512, (3, 3), activation='relu'))
+model.add(MaxPooling2D((2,2), strides=(2,2)))
+model.add(ZeroPadding2D((1,1)))
+model.add(Convolution2D(512, (3, 3), activation='relu'))
+model.add(ZeroPadding2D((1,1)))
+model.add(Convolution2D(512, (3, 3), activation='relu'))
+model.add(ZeroPadding2D((1,1)))
+model.add(Convolution2D(512, (3, 3), activation='relu'))
+model.add(MaxPooling2D((2,2), strides=(2,2)))
+model.add(Convolution2D(512, (3, 3), activation='relu'))
+model.add(Dropout(0.5))
+model.add(Convolution2D(512, (1, 1), activation='relu'))
+model.add(Dropout(0.5))
+# model.add(Convolution2D(2622, (1, 1)))
+model.add(Flatten())           
+model.add(Dense(1,activation="sigmoid"))            
 model.summary()
 
 # ES
@@ -197,7 +235,7 @@ while True:
         face = cv2.cvtColor(face, cv2.COLOR_BGR2GRAY)
         Training_Data.append(np.asarray(face, dtype=np.uint8))
         face = np.array(Training_Data)
-        face = face.reshape(face.shape[0],50,50,16)
+        face = face.reshape(face.shape[0],100,100,4)
 
         #위에서 학습한 모델로 예측시도
         result = model.predict(face)

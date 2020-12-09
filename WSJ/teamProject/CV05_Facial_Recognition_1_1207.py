@@ -44,6 +44,7 @@ def face_extractor(img):
     try:    
         if faces[1] is not None:
             print("ifif")
+            # 얼굴 2개이상이면 이미지 버리기
             return None
     except:
         pass
