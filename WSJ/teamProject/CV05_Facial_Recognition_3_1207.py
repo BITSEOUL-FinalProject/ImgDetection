@@ -1,4 +1,4 @@
-# 리사이즈된 이미지를 불러다가 모델을 돌리고 실시간으로 들어오는 영상에 나오는 얼굴을 인식
+# 종합
 import cv2
 import numpy as np
 from os import listdir
@@ -20,11 +20,12 @@ face_classifier5 = cv2.CascadeClassifier(xml_path5)
 
 
 #데이터와 매칭될 라벨 변수 
-Training_Data, Labels = [], []
 
-def hamsu(cnt):
+Training_Data, Labels = [], []
+Training_Data2, Labels2 = [], []
+def hamsu(cnt,t):
     print(cnt)
-    data_path = './WSJ/teamProject/images3/'+str(cnt)+"/"
+    data_path = './teamProject/images5/'+str(cnt)+"_"+str(t)+"/"
 
     #faces폴더에 있는 파일 리스트 얻기 
     onlyfiles = [f for f in listdir(data_path) if isfile(join(data_path,f))]
@@ -39,33 +40,59 @@ def hamsu(cnt):
         if images is None:
             continue    
         #Training_Data 리스트에 이미지를 바이트 배열로 추가 
-        Training_Data.append(np.asarray(images, dtype=np.uint8))
+        
+        if t == "test":
+            Training_Data2.append(np.asarray(images, dtype=np.uint8))
+            Labels2.append(cnt)
 
-        #Labels 리스트엔 카운트 번호 추가 
-        Labels.append(cnt)
+        elif t == "train":
+            Training_Data.append(np.asarray(images, dtype=np.uint8))
+            Labels.append(cnt)
+          
 
 cnt = 0    
-hamsu(cnt)
-hamsu(cnt+1)
+hamsu(cnt,"train")
+hamsu(cnt,"test")
+hamsu(cnt+1,"train")
+hamsu(cnt+1,"test")
 
+Training_Data2 = np.array(Training_Data2)
+Labels2        = np.array(Labels2)
 Training_Data = np.array(Training_Data)
 Labels        = np.array(Labels)
-print(Training_Data.shape)  
-print(Labels.shape)  
 
-Training_Data = Training_Data.reshape(Training_Data.shape[0],200*200)
+# print(Training_Data.shape)  
+# print(Labels.shape)  
+# print(Training_Data2.shape)  
+# print(Labels2.shape)  
+
+# x_train = Training_Data
+# x_test  = Training_Data2
+# y_train = Labels
+# y_test  = Labels2
+
+# x_train = x_train.reshape(x_train.shape[0],100,100,4)
+# x_test = x_test.reshape(x_test.shape[0],100,100,4)
+x = np.append(Training_Data, Training_Data2, axis=0)
+y = np.append(Labels, Labels2, axis=0)
+
+x = x.reshape(x.shape[0],200*200)
 
 from sklearn.model_selection import train_test_split
-x_train, x_test , y_train  , y_test = train_test_split(Training_Data , Labels , train_size=0.8,shuffle=True,random_state=12)
-x_val, x_test , y_val  , y_test = train_test_split(x_test , y_test , test_size=0.5, shuffle=True,random_state=12)
-
+x_train, x_test , y_train  , y_test = train_test_split(x , y , train_size=0.8,shuffle=True,random_state=13)
 x_train = x_train.reshape(x_train.shape[0],100,100,4)
 x_test = x_test.reshape(x_test.shape[0],100,100,4)
-x_val = x_val.reshape(x_val.shape[0],100,100,4)
 
-print(x_train.shape)
-print(x_test.shape)
-print(x_val.shape)
+# x_val, x_test , y_val  , y_test = train_test_split(x_test , y_test , test_size=0.5, shuffle=True,random_state=12)
+
+# x_train = x_train.reshape(x_train.shape[0],50,50,16)
+# x_test = x_test.reshape(x_test.shape[0],50,50,16)
+# x_val = x_val.reshape(x_val.shape[0],50,50,16)
+
+# print(x_train.shape)
+# print(x_test.shape)
+# print(x_val.shape)
+
 
 
 # 2. 모델
@@ -74,69 +101,40 @@ from tensorflow.keras.layers import Dense
 from tensorflow.keras.layers import Conv2D
 from tensorflow.keras.layers import MaxPooling2D
 from tensorflow.keras.layers import Flatten
-from tensorflow.keras.layers import Dropout, ZeroPadding2D, Convolution2D
+from tensorflow.keras.layers import Dropout, BatchNormalization
 
 model = Sequential()
 # model.add(Conv2D(10,(3,3),input_shape=(50,50,16),activation='relu')) 
 # model.add(Flatten())  
 # model.add(Dense(20,activation='relu'))  
 # model.add(Dense(10,activation='relu'))
-# model.add(Conv2D(60,(3,3),input_shape=(50,50,16),activation='relu')) 
-# model.add(Conv2D(50,(3,3),activation='relu'))     
-# model.add(Dropout(0.2))
-# model.add(MaxPooling2D(pool_size=2))   # pool_size default : 2     
-# model.add(Conv2D(40,(3,3),activation='relu'))                      
-# model.add(Conv2D(30,(3,3),activation='relu'))                      
-# model.add(Dropout(0.2))                
-# model.add(MaxPooling2D(pool_size=2))   # pool_size default : 2  
-# model.add(Conv2D(20,(3,3),activation='relu')) 
-# model.add(Dropout(0.2))
-# model.add(Flatten())     
+model.add(Conv2D(64,(3,3),input_shape=(100,100,4),activation='relu')) 
+model.add(BatchNormalization())
+
+model.add(Conv2D(64,(3,3),activation='relu'))     
+model.add(BatchNormalization())
+model.add(Dropout(0.2))
+model.add(MaxPooling2D(pool_size=2))   # pool_size default : 2     
+
+model.add(Conv2D(128,(3,3),activation='relu'))                      
+model.add(BatchNormalization())
+
+model.add(Conv2D(128,(3,3),activation='relu'))                      
+model.add(BatchNormalization())
+model.add(Dropout(0.2))                
+model.add(MaxPooling2D(pool_size=2))   # pool_size default : 2  
+
+model.add(Conv2D(256,(3,3),activation='relu')) 
+model.add(BatchNormalization())
+model.add(Dropout(0.2))
+model.add(Flatten())     
 # model.add(Dense(10,activation='relu'))
-# model.add(Dense(1,activation="sigmoid"))            
-model.add(ZeroPadding2D((1,1),input_shape=(100, 100, 4)))
-model.add(Convolution2D(64, (3, 3), activation='relu'))
-model.add(ZeroPadding2D((1,1)))
-model.add(Convolution2D(64, (3, 3), activation='relu'))
-model.add(MaxPooling2D((2,2), strides=(2,2)))
-model.add(ZeroPadding2D((1,1)))
-model.add(Convolution2D(128, (3, 3), activation='relu'))
-model.add(ZeroPadding2D((1,1)))
-model.add(Convolution2D(128, (3, 3), activation='relu'))
-model.add(MaxPooling2D((2,2), strides=(2,2)))
-model.add(ZeroPadding2D((1,1)))
-model.add(Convolution2D(256, (3, 3), activation='relu'))
-model.add(ZeroPadding2D((1,1)))
-model.add(Convolution2D(256, (3, 3), activation='relu'))
-model.add(ZeroPadding2D((1,1)))
-model.add(Convolution2D(256, (3, 3), activation='relu'))
-model.add(MaxPooling2D((2,2), strides=(2,2)))
-model.add(ZeroPadding2D((1,1)))
-model.add(Convolution2D(512, (3, 3), activation='relu'))
-model.add(ZeroPadding2D((1,1)))
-model.add(Convolution2D(512, (3, 3), activation='relu'))
-model.add(ZeroPadding2D((1,1)))
-model.add(Convolution2D(512, (3, 3), activation='relu'))
-model.add(MaxPooling2D((2,2), strides=(2,2)))
-model.add(ZeroPadding2D((1,1)))
-model.add(Convolution2D(512, (3, 3), activation='relu'))
-model.add(ZeroPadding2D((1,1)))
-model.add(Convolution2D(512, (3, 3), activation='relu'))
-model.add(ZeroPadding2D((1,1)))
-model.add(Convolution2D(512, (3, 3), activation='relu'))
-model.add(MaxPooling2D((2,2), strides=(2,2)))
-model.add(Convolution2D(512, (3, 3), activation='relu'))
-model.add(Dropout(0.5))
-model.add(Convolution2D(512, (1, 1), activation='relu'))
-model.add(Dropout(0.5))
-# model.add(Convolution2D(2622, (1, 1)))
-model.add(Flatten())           
-model.add(Dense(1,activation="sigmoid"))            
+model.add(Dense(1,activation="sigmoid"))                       
 model.summary()
 
 # ES
 from tensorflow.keras.callbacks import EarlyStopping
-es = EarlyStopping(monitor='val_loss',patience=20, mode='auto')
+es = EarlyStopping(monitor='val_loss',patience=10, mode='auto')
 
 model.compile(loss="binary_crossentropy",optimizer="adam",metrics="acc")
 
@@ -164,11 +162,12 @@ model.compile(loss="binary_crossentropy",optimizer="adam",metrics="acc")
 # model.fit(x_train,y_train,verbose=True, eval_metric="error", 
 #           eval_set=[(x_train,y_train),(x_test,y_test)],early_stopping_rounds=30)
 
-model.fit(x_train,y_train,epochs=10000,batch_size=16,validation_data=(x_val,y_val),callbacks=[es],verbose=1)
+model.fit(x_train,y_train,epochs=1,batch_size=32,validation_split=0.5,callbacks=[es],verbose=1)
 
 # # 4. 평가 예측
-loss , acc= model.evaluate(x_test,y_test,batch_size=16)
-
+loss , acc= model.evaluate(x_test,y_test,batch_size=32)
+# 329/329 [==============================] - 7s 20ms/step - loss: 0.0853 - acc: 0.9692 - val_loss: 0.1776 - val_acc: 0.9389
+# 165/165 [==============================] - 1s 5ms/step - loss: 0.1856 - acc: 0.9330
 # result = model.predict(x_test)
 # r = np.argmax(result[1])
 # print(r)
@@ -186,19 +185,29 @@ def face_detector(img, size = 0.5):
                 if faces is():
                     faces = face_classifier5.detectMultiScale(gray,1.3,5)
                     if faces is():
-                        return img,[]
+                        return img,[] 
+                      
     rr = []    
     for(x,y,w,h) in faces:
-        cv2.rectangle(img, (x,y),(x+w,y+h),(0,255,255),2)
-        try:    
+        try:  
+            print(faces[0])  
+            print("111111111111",faces[1])  
             if faces[1] is not None:
                 print("ifif")
-                roi = img[y:y+h, x:x+w]
-                roi = cv2.resize(roi, (200,200))
-                rr = rr.append(roi)
-                rr = np.array(rr)
-                return img,rr
+                for j in range(len(faces)):
+                    print("forfor")
+                    print(j)
+                    for(x,y,w,h) in [faces[j]]:
+                        print("x,y,w,h",x,y,w,h)
+                        print("forforforfor")
+                        cv2.rectangle(img, (x,y),(x+w,y+h),(0,255,255),2)
+                        roi = img[y:y+h, x:x+w]
+                        roi = cv2.resize(roi, (200,200))
+                        rr = rr.append(roi)
+                        print("rrrr",rr)
+                return img,rr    
         except:
+            cv2.rectangle(img, (x,y),(x+w,y+h),(0,255,255),2)
             roi = img[y:y+h, x:x+w]
             roi = cv2.resize(roi, (200,200))
             return img,roi   #검출된 좌표에 사각 박스 그리고(img), 검출된 부위를 잘라(roi) 전달
@@ -220,7 +229,7 @@ if movie.isOpened() == False: #동영상 핸들 확인
 
 #create the window & change the window size
 #윈도우 생성 및 사이즈 변경
-cv2.namedWindow('Face')
+# cv2.namedWindow('Face')
 
 
 while True:
@@ -229,6 +238,11 @@ while True:
 
     # 얼굴 검출 시도 
     image, face = face_detector(frame)
+    try:
+        if face[1] is not None:
+            face = np.array(face)
+    except:
+        pass
     Training_Data = []
     try:
         #검출된 사진을 흑백으로 변환 
@@ -249,36 +263,38 @@ while True:
 
         # cv2.putText(image,display_string,(100,120), cv2.FONT_HERSHEY_COMPLEX,1,(250,120,255),2)
         #75 보다 크면 동일 인물로 간주해 UnLocked! 
-        try:
+        try: 
             if result[1] is not None:
+                print("if")
                 for i in range(len(result)):
-                    if result >= 0.0 and result < 0.02:
+                    print("for")
+                    if result[i] >= 0.0 and result[i] < 0.02:
                         print(result)
-                        cv2.putText(image, "BE", (50, 50), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 2)
+                        cv2.putText(image, "B", (50, 50), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 2)
                         cv2.imshow('Face Cropper', image)
-                    elif result >= 0.98 and result <= 1.02:
+                    elif result[i] >= 0.98 and result[i] <= 1.02:
                         print(result)
-                        cv2.putText(image, "NAM", (300, 50), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 2)
+                        cv2.putText(image, "N", (300, 50), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 2)
                         cv2.imshow('Face Cropper', image)
                     else:
                         print(result)
                         #75 이하면 타인.. Locked!!! 
-                        cv2.putText(image, "MOL", (50, 50), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 0, 255), 2)
+                        cv2.putText(image, "U", (50, 50), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 0, 255), 2)
                         cv2.imshow('Face Cropper', image)
         except:
             pass
         if result >= 0.0 and result < 0.02:
             print(result)
-            cv2.putText(image, "BE", (50, 50), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 2)
+            cv2.putText(image, "B", (50, 50), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 2)
             cv2.imshow('Face Cropper', image)
         elif result >= 0.98 and result <= 1.02:
             print(result)
-            cv2.putText(image, "NAM", (300, 50), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 2)
+            cv2.putText(image, "N", (300, 50), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 2)
             cv2.imshow('Face Cropper', image)
         else:
             print(result)
             #75 이하면 타인.. Locked!!! 
-            cv2.putText(image, "MOL", (50, 50), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 0, 255), 2)
+            cv2.putText(image, "U", (50, 50), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 0, 255), 2)
             cv2.imshow('Face Cropper', image)
     except:
         #얼굴 검출 안됨 
@@ -286,7 +302,7 @@ while True:
         cv2.imshow('Face Cropper', image)
         pass
 
-    if cv2.waitKey(1)==13:
+    if cv2.waitKey(5)==13:
         break
 movie.release()
 cv2.destroyAllWindows()

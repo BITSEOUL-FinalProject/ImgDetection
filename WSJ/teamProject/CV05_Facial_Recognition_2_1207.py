@@ -1,6 +1,4 @@
-# 리사이즈된 이미지 가져와서 keras 모델 돌려보기
-
-
+# 리사이즈된 이미지 가져와서 모델 돌려보기
 import cv2
 import numpy as np
 from os import listdir
