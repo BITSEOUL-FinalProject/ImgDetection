@@ -28,6 +28,7 @@
 *.xml
 *.exe
 *.log
+*.pyc
 #zip파일
 *.dmg
 *.iso
