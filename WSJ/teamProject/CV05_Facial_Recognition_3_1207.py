@@ -1,4 +1,4 @@
-# 종합
+# 리사이즈된 이미지를 불러다가 모델을 돌리고 실시간으로 들어오는 영상에 나오는 얼굴을 인식
 import cv2
 import numpy as np
 from os import listdir
