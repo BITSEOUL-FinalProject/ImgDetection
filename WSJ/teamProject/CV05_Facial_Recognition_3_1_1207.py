@@ -1,4 +1,4 @@
-# 리사이즈된 이미지를 generator를 사용하여 증폭시킨 후 학습시켜 동영상을 예측해본다
+# 종합_1
 import cv2
 import numpy as np
 from os import listdir
@@ -24,8 +24,8 @@ face_classifier5 = cv2.CascadeClassifier(xml_path5)
 Training_Data, Labels = [], []
 Training_Data2, Labels2 = [], []
 def hamsu(cnt,t):
-    print(cnt)
-    data_path = 'D:\\ImgDetection\\WSJ\\teamProject\\images5\\'+str(cnt)+"_"+str(t)+"\\"
+    # print(cnt)
+    data_path = './teamProject/images5/'+str(cnt)+"_"+str(t)+"/"
 
     #faces폴더에 있는 파일 리스트 얻기 
     onlyfiles = [f for f in listdir(data_path) if isfile(join(data_path,f))]
@@ -187,30 +187,34 @@ def face_detector(img, size = 0.5):
                     if faces is():
                         return img,[] 
                       
-    rr = []    
+    rr = [] 
+    xx = []   
+    yy = []   
     for(x,y,w,h) in faces:
         try:  
-            print(faces[0])  
-            print("111111111111",faces[1])  
+            # print(faces[0])  
+            # print("111111111111",faces[1])  
             if faces[1] is not None:
-                print("ifif")
+                # print("ifif")
                 for j in range(len(faces)):
-                    print("forfor")
-                    print(j)
+                    # print("forfor")
+                    # print(j)
                     for(x,y,w,h) in [faces[j]]:
-                        print("x,y,w,h",x,y,w,h)
-                        print("forforforfor")
+                        # print("x,y,w,h",x,y,w,h)
+                        # print("forforforfor")
                         cv2.rectangle(img, (x,y),(x+w,y+h),(0,255,255),2)
                         roi = img[y:y+h, x:x+w]
                         roi = cv2.resize(roi, (200,200))
                         rr = rr.append(roi)
-                        print("rrrr",rr)
-                return img,rr    
+                        xx = xx.append(x)
+                        yy = yy.append(y)
+                        # print("rrrr",rr)
+                return img,rr,xx,yy    
         except:
             cv2.rectangle(img, (x,y),(x+w,y+h),(0,255,255),2)
             roi = img[y:y+h, x:x+w]
             roi = cv2.resize(roi, (200,200))
-            return img,roi   #검출된 좌표에 사각 박스 그리고(img), 검출된 부위를 잘라(roi) 전달
+            return img,roi,x,y   #검출된 좌표에 사각 박스 그리고(img), 검출된 부위를 잘라(roi) 전달
 
     
 
@@ -237,7 +241,10 @@ while True:
     ret, frame = movie.read()
 
     # 얼굴 검출 시도 
-    image, face = face_detector(frame)
+    try:
+        image, face,x,y = face_detector(frame)
+    except:
+        image, face = face_detector(frame)
     try:
         if face[1] is not None:
             face = np.array(face)
@@ -247,13 +254,10 @@ while True:
     try:
         #검출된 사진을 흑백으로 변환 
         face = cv2.cvtColor(face, cv2.COLOR_BGR2GRAY)
-        print("1111111111111")
         Training_Data.append(np.asarray(face, dtype=np.uint8))
-        print("222")
         face = np.array(Training_Data)
-        print("3333")
         face = face.reshape(face.shape[0],100,100,4)
-        print("44444")
+
         #위에서 학습한 모델로 예측시도
         result = model.predict(face)
         # result = np.argmax(result)
@@ -268,36 +272,46 @@ while True:
         #75 보다 크면 동일 인물로 간주해 UnLocked! 
         try: 
             if result[1] is not None:
-                print("if")
+                # print("if")
+                bss1 = []
                 for i in range(len(result)):
-                    print("for")
+                    # print("for")
                     if result[i] >= 0.0 and result[i] < 0.02:
-                        print(result)
-                        cv2.putText(image, "B", (50, 50), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 2)
-                        cv2.imshow('Face Cropper', image)
+                        print("result B ",result)
+                        # cv2.putText(image, "B", (50, 50), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 2)
+                        # cv2.imshow('Face Cropper', image)
+                        bss1.append([cv2.putText(image, "B", (x[i], y[i]), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 2)])
+
                     elif result[i] >= 0.98 and result[i] <= 1.02:
-                        print(result)
-                        cv2.putText(image, "N", (300, 50), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 2)
-                        cv2.imshow('Face Cropper', image)
+                        print("result N ",result)
+                        # cv2.putText(image, "N", (300, 50), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 2)
+                        # cv2.imshow('Face Cropper', image)
+                        bss1.append([cv2.putText(image, "N", (x[i], y[i]), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 2)])
+
                     else:
-                        print(result)
+                        print("result U ",result)
                         #75 이하면 타인.. Locked!!! 
-                        cv2.putText(image, "U", (50, 50), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 0, 255), 2)
-                        cv2.imshow('Face Cropper', image)
+                        # cv2.putText(image, "U", (200, 50), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 0, 255), 2)
+                        # cv2.imshow('Face Cropper', image)
+                        bss1.append([cv2.putText(image, "U", (x[i], y[i]), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 0, 255), 2)])
+                
+                bss1[:]
+                cv2.imshow('Face Cropper', image)
+                
         except:
             pass
         if result >= 0.0 and result < 0.02:
             print(result)
-            cv2.putText(image, "B", (50, 50), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 2)
+            cv2.putText(image, "B", (x, y), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 2)
             cv2.imshow('Face Cropper', image)
         elif result >= 0.98 and result <= 1.02:
             print(result)
-            cv2.putText(image, "N", (300, 50), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 2)
+            cv2.putText(image, "N", (x, y), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 2)
             cv2.imshow('Face Cropper', image)
         else:
             print(result)
             #75 이하면 타인.. Locked!!! 
-            cv2.putText(image, "U", (50, 50), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 0, 255), 2)
+            cv2.putText(image, "U", (x, y), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 0, 255), 2)
             cv2.imshow('Face Cropper', image)
     except:
         #얼굴 검출 안됨 
