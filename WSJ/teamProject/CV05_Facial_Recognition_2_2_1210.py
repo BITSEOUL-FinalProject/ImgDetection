@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 from os import listdir
 from os.path import isfile, join
+import matplotlib.pyplot as plt
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense
 from tensorflow.keras.layers import Conv2D
@@ -26,10 +27,11 @@ face_classifier5 = cv2.CascadeClassifier(xml_path5)
 Training_Data, Labels = [], []
 Training_Data2, Labels2 = [], []
 def hamsu(cnt,t):
-    data_path = './teamProject/images5/'+str(cnt)+"_"+str(t)+"/"
+    data_path = './WSJ/teamProject/images5/'+str(cnt)+"_"+str(t)+"/"
 
     #faces폴더에 있는 파일 리스트 얻기 
     onlyfiles = [f for f in listdir(data_path) if isfile(join(data_path,f))]
+ 
 
     #파일 개수 만큼 루프 
     for i, files in enumerate(onlyfiles):    
@@ -37,6 +39,7 @@ def hamsu(cnt,t):
         image_path = data_path + onlyfiles[i]
         #이미지 불러오기 
         images = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+
         #이미지 파일이 아니거나 못 읽어 왔다면 무시
         if images is None:
             continue    
@@ -50,10 +53,10 @@ def hamsu(cnt,t):
             Labels.append(cnt)
 cnt = 0    
 hamsu(cnt,"train")
-hamsu(cnt,"test")
-hamsu(cnt+1,"train")
-hamsu(cnt+1,"test")
-
+# hamsu(cnt,"test")
+# hamsu(cnt+1,"train")
+# hamsu(cnt+1,"test")
+'''
 Training_Data2 = np.array(Training_Data2)
 Labels2        = np.array(Labels2)
 Training_Data = np.array(Training_Data)
@@ -148,3 +151,4 @@ loss , acc= model.evaluate(x_test,y_test,batch_size=32)
 
 # y_pred = model.predict(x_test[:10])
 # print(np.argmax(y_pred))
+'''

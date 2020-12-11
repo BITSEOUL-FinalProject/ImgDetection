@@ -59,7 +59,7 @@ def face_extractor(img):
     return cropped_face
 
 count = 0
-image_path1 = "./teamProject/images2/1/"
+image_path1 = "./WSJ/teamProject/images2/1/"
 for i in range(1000):
     img = cv2.imread(image_path1+str(i+1)+".jpg")
     # print(image_path1+str(i+1)+".jpg")
@@ -67,15 +67,17 @@ for i in range(1000):
             count+=1
             #얼굴 이미지 크기를 200x200으로 조정 
             face = cv2.resize(face_extractor(img),(200,200))
+            print("none : ",face.shape)
             #조정된 이미지를 흑백으로 변환 
             face = cv2.cvtColor(face, cv2.COLOR_BGR2GRAY)
+            print("gray : ",face.shape)
             #faces폴더에 jpg파일로 저장 
             # ex > faces/user0.jpg   faces/user1.jpg ....
             # file_name_path = './teamProject/images3/'+str(i+1)+"-"+str(count)+'.jpg'          
-            file_name_path = './teamProject/images3/1/'+str(count)+'.jpg'          
-            cv2.imwrite(file_name_path,face)
-            print(count)
-            print(i+1)
+            # file_name_path = './teamProject/images3/1/'+str(count)+'.jpg'          
+            # cv2.imwrite(file_name_path,face)
+            # print(count)
+            # print(i+1)
     else:
         print("Face not Found")
 
