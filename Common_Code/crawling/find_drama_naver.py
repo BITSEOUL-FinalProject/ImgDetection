@@ -1,4 +1,3 @@
-import urllib
 from bs4 import BeautifulSoup as bs
 from urllib.parse import urlencode, quote_plus, unquote
 from urllib.request import urlopen, urlretrieve
@@ -38,9 +37,13 @@ find_imglist = np.array(find_imglist)
 find_casting = np.array(find_casting)
 find_namelist = np.array(find_namelist)
 
-np.save('./Common_data/npy/find_imglist.npy', arr=find_imglist)
-np.save('./Common_data/npy/find_casting.npy', arr=find_casting)
-np.save('./Common_data/npy/find_namelist.npy', arr=find_namelist)
-
 google_crawling.google_crawling(find_namelist)
 naver_crawling.naver_crawling(find_namelist)
+
+
+
+
+# np.save('./Common_data/npy/find_imglist.npy', arr=find_imglist)
+# np.save('./Common_data/npy/find_casting.npy', arr=find_casting)
+# np.save('./Common_data/npy/find_namelist.npy', arr=find_namelist)
+

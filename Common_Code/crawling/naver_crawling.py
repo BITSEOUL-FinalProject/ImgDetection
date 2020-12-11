@@ -13,14 +13,14 @@ import urllib.request
 
 def naver_crawling(find_namelist):
     for i in range(2):
-        path = './MJK/data/image2/'+str(i)+'/'
+        path = './MJK/data/image2/'+str(i+2)+'/'
         os.makedirs(path, exist_ok=True)
         driver = webdriver.Chrome()
         driver.get(
             "https://search.naver.com/search.naver?where=image&sm=tab_jum&query=")
 
         elem = driver.find_element_by_name("query")
-        elem.send_keys(find_namelist[i])
+        elem.send_keys(find_namelist[i+2])
         elem.send_keys(Keys.RETURN)
 
         SCROLL_PAUSE_TIME = 1
