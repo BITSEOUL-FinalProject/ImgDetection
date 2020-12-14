@@ -1,5 +1,6 @@
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
-from tensorflow.keras.applications import InceptionResNetV2
+from tensorflow.keras.applications.xception import Xception
+from tensorflow.keras.applications.vgg16 import VGG16
 import numpy as np
 import matplotlib.pyplot as plt
 from tensorflow.keras.models import Sequential, Model, load_model
@@ -8,7 +9,6 @@ import PIL.Image as pilimg
 from keras import regularizers
 import cv2
 
-# find_namelist = np.load('./Common_data/npy/find_namelist.npy', all)
 np.random.seed(33)
 
 # 이미지 생성 옵션 정하기
@@ -53,51 +53,7 @@ predict = pred_datagen.flow_from_directory(
 )
 
 # 2. 모델 구성
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Conv2D, Dense, Flatten, MaxPooling2D, Dropout, Activation, BatchNormalization
-
-inceptionResNetV2 = InceptionResNetV2(include_top=False, input_shape=(xy_train[0][0].shape[1], xy_train[0][0].shape[2], xy_train[0][0].shape[3]))
-inceptionResNetV2.trainable = False
-
-model = Sequential()
-model.add(inceptionResNetV2)
-model.add(Flatten())   
-model.add(Dense(64, kernel_initializer='he_normal', activation='relu'))                            
-model.add(Dense(128, kernel_initializer='he_normal', activation='relu'))                                    
-model.add(Dense(1, activation = 'sigmoid'))
-
-#3. 컴파일, 훈련
-# model = load_model('./MJK/data/weight/cp_inc-33-0.115449.hdf5')
-# modelpath = "D:/ImgDetection/MJK/data/weight/cp_inc-{epoch:02d}-{val_loss:4f}.hdf5"  
-
-model.compile(loss='binary_crossentropy', optimizer='adam', metrics =['acc'])
-from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
-
-reduce_lr = ReduceLROnPlateau(
-    monitor='val_loss',
-    patience=3,
-    factor=0.5,
-    verbose=1
-)
-early_stopping = EarlyStopping(monitor='val_loss', mode='min', patience=20, verbose=1)
-
-# check_point = ModelCheckpoint(
-#     filepath = modelpath,
-#     # save_weights_only=True,
-#     save_best_only=True,
-#     monitor='val_loss',
-#     verbose=1
-# )
-
-hist = model.fit_generator(
-    xy_train, #train 안에 x, y의 데이터를 모두 가지고 있다
-    steps_per_epoch=len(xy_train),
-    validation_data=(xy_test),
-    validation_steps=len(xy_test),
-    epochs=100,
-    verbose=1,
-    callbacks=[reduce_lr, early_stopping]
-)
+model = load_model('./MJK/data/weight/cp_inc-33-0.095160.hdf5') 
 
 #4. 평가, 예측
 loss, acc = model.evaluate(xy_test)
@@ -106,7 +62,7 @@ print("acc : ", acc)
 
 y_pred = model.predict(predict)
 print("y_pred : ", y_pred)
-# print(y_pred.shape)
+print(y_pred.shape)
 
 import matplotlib.pyplot as plt
 
@@ -127,10 +83,59 @@ for i in range(len(predict[0])):
     ax = fig.add_subplot(rows, cols, i+1)
     ax.imshow(predict[0][i])
     label = printIndex(y_pred, i)
-    print(label)
+    # print(label)
     ax.set_xlabel(label)
     ax.set_xticks([]), ax.set_yticks([])
 plt.show()
 
-# loss :  0.09911339730024338
-# acc :  0.9624999761581421
+# loss :  0.16194841265678406
+# acc :  0.9437500238418579
+#  [0.99698895]
+#  [0.02451021]
+#  [0.9973544 ]
+#  [0.9924245 ]
+#  [0.0570064 ]
+#  [0.9040135 ]
+#  [0.9461852 ]
+#  [0.01738477]
+#  [0.85327214]
+#  [0.99225265]
+#  [0.67492515]
+#  [0.9836431 ]
+#  [0.00730109]
+#  [0.07669482]
+#  [0.8139179 ]
+#  [0.99146324]
+#  [0.0135073 ]
+#  [0.0036249 ]
+#  [0.9564992 ]
+#  [0.89642656]
+#  [0.6596768 ]
+#  [0.5442315 ]
+#  [0.4975191 ]
+#  [0.05730857]
+#  [0.00679069]
+#  [0.99110526]
+#  [0.04862578]
+#  [0.0539133 ]
+#  [0.00537304]
+#  [0.99581003]
+#  [0.9465147 ]
+#  [0.01135786]
+#  [0.27201033]
+#  [0.37967515]
+#  [0.75213146]
+#  [0.7929427 ]
+#  [0.9858181 ]
+#  [0.00963665]
+#  [0.0036931 ]
+#  [0.0090879 ]
+#  [0.5691298 ]
+#  [0.9956832 ]
+#  [0.9988802 ]
+#  [0.96950173]
+#  [0.98985684]
+#  [0.98529667]
+#  [0.01022546]
+#  [0.9978059 ]
+#  [0.03624589]]
