@@ -12,13 +12,13 @@ import time
 import urllib.request
 
 def google_crawling(find_namelist):
-    for i in range(2):
-        path = './MJK/data/image/'+str(i+2)+'/'
+    for i in range(4):
+        path = './MJK/data/image/'+str(i)+'/'
         os.makedirs(path, exist_ok=True)
         driver = webdriver.Chrome('./Common_Code/chromedriver.exe')
         driver.get("https://www.google.co.kr/imghp?hl=ko&tab=wi&authuser=0&ogbl")
         elem = driver.find_element_by_name("q")
-        elem.send_keys(find_namelist[i+2])
+        elem.send_keys(find_namelist[i])
         elem.send_keys(Keys.RETURN)
 
         SCROLL_PAUSE_TIME = 1

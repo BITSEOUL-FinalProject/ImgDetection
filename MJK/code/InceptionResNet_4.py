@@ -1,6 +1,5 @@
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
-from tensorflow.keras.applications.xception import Xception
-from tensorflow.keras.applications.vgg16 import VGG16
+from tensorflow.keras.applications import InceptionResNetV2
 import numpy as np
 import matplotlib.pyplot as plt
 from tensorflow.keras.models import Sequential, Model, load_model
@@ -8,8 +7,8 @@ from tensorflow.keras.layers import Dense, Conv2D, Dropout, MaxPooling2D, Flatte
 import PIL.Image as pilimg
 from keras import regularizers
 import cv2
-from tensorflow.keras.utils import to_categorical
 
+# find_namelist = np.load('./Common_data/npy/find_namelist.npy', all)
 np.random.seed(33)
 
 # 이미지 생성 옵션 정하기
@@ -57,25 +56,22 @@ predict = pred_datagen.flow_from_directory(
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Conv2D, Dense, Flatten, MaxPooling2D, Dropout, Activation, BatchNormalization
 
+inceptionResNetV2 = InceptionResNetV2(include_top=False, input_shape=(xy_train[0][0].shape[1], xy_train[0][0].shape[2], xy_train[0][0].shape[3]))
+inceptionResNetV2.trainable = False
+
 model = Sequential()
-model.add(Conv2D(64, (3, 3), activation='relu', input_shape=(200, 200, 3)))
-model.add(MaxPooling2D())
-model.add(Conv2D(64, (3, 3), padding="same", activation='relu'))
-model.add(MaxPooling2D())
-model.add(Conv2D(128, (3, 3), padding="same", activation='relu'))
-model.add(MaxPooling2D())
-model.add(Conv2D(256, (6, 6), padding="same", activation='relu'))
-model.add(MaxPooling2D())
-model.add(Flatten()) 
-model.add(Dropout(0.5))
-model.add(Dense(512, activation='relu'))
-model.add(Dense(4, activation='softmax')) 
-model.summary()
+model.add(inceptionResNetV2)
+model.add(Flatten())   
+model.add(Dense(64, kernel_initializer='he_normal', activation='relu'))                            
+model.add(Dense(128, kernel_initializer='he_normal', activation='relu'))                                    
+model.add(Dense(4, activation = 'softmax'))
 
 #3. 컴파일, 훈련
-modelpath = "D:/ImgDetection/MJK/data/weight/cp-rmsprop-{epoch:02d}-{val_loss:4f}.hdf5"  
-model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics =['acc'])
-from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau, ModelCheckpoint
+# model = load_model('./MJK/data/weight/cp_inc-33-0.115449.hdf5')
+modelpath = "D:/ImgDetection/MJK/data/weight/cp_adam_inc-{epoch:02d}-{val_loss:4f}.hdf5"  
+
+model.compile(loss='categorical_crossentropy', optimizer='adam', metrics =['acc'])
+from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
 
 reduce_lr = ReduceLROnPlateau(
     monitor='val_loss',
@@ -83,8 +79,7 @@ reduce_lr = ReduceLROnPlateau(
     factor=0.5,
     verbose=1
 )
-
-early_stopping = EarlyStopping(monitor='val_loss', mode='min', patience=20, verbose=1)
+early_stopping = EarlyStopping(monitor='val_loss', mode='min', patience=30, verbose=1)
 
 check_point = ModelCheckpoint(
     filepath = modelpath,
@@ -111,6 +106,7 @@ print("acc : ", acc)
 
 y_pred = model.predict(predict)
 print("y_pred : ", y_pred)
+# print(y_pred.shape)
 
 import matplotlib.pyplot as plt
 
@@ -140,15 +136,14 @@ for i in range(len(predict[0])):
     ax.set_xticks([]), ax.set_yticks([])
 plt.show()
 
-# loss :  0.16894356906414032
-# acc :  0.918749988079071
-
-
-# adam
-# loss :  0.6471794843673706
-# acc :  0.7384615540504456
+# loss :  0.09911339730024338
+# acc :  0.9624999761581421
 
 
 # rmsprop
-# loss :  0.4521673619747162
-# acc :  0.8423076868057251
+# loss :  0.6048264503479004
+# acc :  0.75
+
+# adam
+# loss :  0.5558212995529175
+# acc :  0.7538461685180664
