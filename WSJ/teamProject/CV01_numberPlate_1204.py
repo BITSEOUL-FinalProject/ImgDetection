@@ -28,6 +28,7 @@ plt.imshow(gray_img,cmap="gray")
 print(gray_img.shape)
 # 여기서 cmap=gray하면 회색으로 변함
 plt.show()
+
 '''
 # 쓰레쉬홀딩 할꺼임
 # Adaptive Thresholding

@@ -15,7 +15,7 @@ def naver_crawling(find_namelist):
     for i in range(2):
         path = './MJK/data/image2/'+str(i+2)+'/'
         os.makedirs(path, exist_ok=True)
-        driver = webdriver.Chrome()
+        driver = webdriver.Chrome('./Common_Code/chromedriver.exe')
         driver.get(
             "https://search.naver.com/search.naver?where=image&sm=tab_jum&query=")
 
@@ -43,7 +43,7 @@ def naver_crawling(find_namelist):
 
         # images = driver.find_elements_by_css_selector("._img")
         images = driver.find_elements_by_css_selector(".img_border")
-        count = 1
+        count = 1000
         for image in images:
             try:
                 image.click()

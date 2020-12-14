@@ -37,7 +37,7 @@ find_imglist = np.array(find_imglist)
 find_casting = np.array(find_casting)
 find_namelist = np.array(find_namelist)
 
-google_crawling.google_crawling(find_namelist)
+# google_crawling.google_crawling(find_namelist)
 naver_crawling.naver_crawling(find_namelist)
 
 
