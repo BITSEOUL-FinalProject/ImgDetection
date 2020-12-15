@@ -8,6 +8,7 @@ from tensorflow.keras.layers import Dense, Conv2D, Dropout, MaxPooling2D, Flatte
 import PIL.Image as pilimg
 from keras import regularizers
 import cv2
+from tensorflow.keras.utils import to_categorical
 
 np.random.seed(33)
 
@@ -48,13 +49,61 @@ xy_test = test_datagen.flow_from_directory(
 predict = pred_datagen.flow_from_directory(
     './MJK/data/pred', 
     target_size=(200,200),
-    batch_size=50,  
+    batch_size=55,  
     class_mode=None,
     shuffle=False,
 )
 
 # 2. 모델 구성
-model = load_model('./MJK/data/weight/cp-rmsprop-75-0.428727.hdf5') 
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Conv2D, Dense, Flatten, MaxPooling2D, Dropout, Activation, BatchNormalization
+
+model = Sequential()
+model.add(Conv2D(64, (3, 3), activation='relu', input_shape=(200, 200, 3)))
+model.add(MaxPooling2D())
+model.add(Conv2D(64, (3, 3), padding="same", activation='relu'))
+model.add(MaxPooling2D())
+model.add(Conv2D(128, (3, 3), padding="same", activation='relu'))
+model.add(MaxPooling2D())
+model.add(Conv2D(256, (6, 6), padding="same", activation='relu'))
+model.add(MaxPooling2D())
+model.add(Flatten()) 
+model.add(Dense(512, activation='relu'))
+model.add(Dense(4, activation='softmax')) 
+model.summary()
+
+#3. 컴파일, 훈련
+modelpath = "D:/ImgDetection/MJK/data/weight/cp-final-{epoch:02d}-{val_loss:4f}.hdf5"  
+model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics =['acc'])
+
+from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau, ModelCheckpoint
+
+reduce_lr = ReduceLROnPlateau(
+    monitor='val_loss',
+    patience=5,
+    factor=0.5,
+    verbose=1
+)
+
+early_stopping = EarlyStopping(monitor='val_loss', mode='min', patience=20, verbose=1)
+
+check_point = ModelCheckpoint(
+    filepath = modelpath,
+    # save_weights_only=True,
+    save_best_only=True,
+    monitor='val_loss',
+    verbose=1
+)
+
+hist = model.fit_generator(
+    xy_train, #train 안에 x, y의 데이터를 모두 가지고 있다
+    steps_per_epoch=len(xy_train),
+    validation_data=(xy_test),
+    validation_steps=len(xy_test),
+    epochs=150,
+    verbose=1,
+    callbacks=[reduce_lr, early_stopping, check_point]
+)
 
 #4. 평가, 예측
 loss, acc = model.evaluate(xy_test)
@@ -63,7 +112,6 @@ print("acc : ", acc)
 
 y_pred = model.predict(predict)
 # print("y_pred : ", y_pred)
-# print(y_pred.shape)
 
 import matplotlib.pyplot as plt
 
@@ -88,15 +136,18 @@ for i in range(len(predict[0])):
     ax = fig.add_subplot(rows, cols, i+1)
     ax.imshow(predict[0][i])
     label = printIndex(y_pred, i)
-    # print(label)
+    print(label)
     ax.set_xlabel(label)
     ax.set_xticks([]), ax.set_yticks([])
 plt.show()
 
-# loss :  0.16194841265678406
-# acc :  0.9437500238418579
+# loss :  0.16894356906414032
+# acc :  0.918749988079071
 
-# --------------------------------
+# adam
+# loss :  0.6471794843673706
+# acc :  0.7384615540504456
 
-# loss :  0.42872729897499084
+# rmsprop
+# loss :  0.4521673619747162
 # acc :  0.8423076868057251
