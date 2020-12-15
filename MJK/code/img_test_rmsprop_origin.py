@@ -8,6 +8,7 @@ from tensorflow.keras.layers import Dense, Conv2D, Dropout, MaxPooling2D, Flatte
 import PIL.Image as pilimg
 from keras import regularizers
 import cv2
+from tensorflow.keras.utils import to_categorical
 
 np.random.seed(33)
 
@@ -17,7 +18,6 @@ train_datagen = ImageDataGenerator(
     rotation_range=40,
     width_shift_range=0.2,
     height_shift_range=0.2,
-    brightness_range=[0.1, 1.0],
     zoom_range=0.2,
     horizontal_flip=True,
     fill_mode='nearest'    
@@ -35,7 +35,6 @@ xy_train = train_datagen.flow_from_directory(
     # save_to_dir='./data/img/data1_2/train' #전환된 이미지 데이터 파일을 이미지 파일로 저장
 ) 
 
-# x=(150,150,1), train 폴더안에는 ad/normal이 들어있다. y - ad:0, normal:1
 
 xy_test = test_datagen.flow_from_directory(
    './MJK/data/test',
@@ -48,13 +47,64 @@ xy_test = test_datagen.flow_from_directory(
 predict = pred_datagen.flow_from_directory(
     './MJK/data/pred', 
     target_size=(200,200),
-    batch_size=50,  
+    batch_size=55,  
     class_mode=None,
     shuffle=False,
 )
 
 # 2. 모델 구성
-model = load_model('./MJK/data/weight/cp-rmsprop-75-0.428727.hdf5') 
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Conv2D, Dense, Flatten, MaxPooling2D, Dropout, Activation, BatchNormalization
+
+model = Sequential()
+model.add(Conv2D(64, (3, 3), activation='relu', input_shape=(200, 200, 3)))
+model.add(MaxPooling2D())
+model.add(Conv2D(64, (3, 3), padding="same", activation='relu'))
+model.add(MaxPooling2D())
+model.add(Conv2D(128, (3, 3), padding="same", activation='relu'))
+model.add(MaxPooling2D())
+model.add(Conv2D(256, (6, 6), padding="same", activation='relu'))
+model.add(MaxPooling2D())
+model.add(Flatten()) 
+model.add(Dropout(0.5))
+model.add(Dense(512, activation='relu'))
+model.add(Dense(4, activation='softmax')) 
+model.summary()
+
+#3. 컴파일, 훈련
+from tensorflow.keras.optimizers import Adam, Adadelta, Adamax, Adagrad
+from tensorflow.keras.optimizers import RMSprop, SGD, Nadam
+modelpath = "D:/ImgDetection/MJK/data/weight/cp-rmsprop-{epoch:02d}-{val_loss:4f}.hdf5"  
+model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics =['acc'])
+
+from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau, ModelCheckpoint
+
+reduce_lr = ReduceLROnPlateau(
+    monitor='val_loss',
+    patience=5,
+    factor=0.5,
+    verbose=1
+)
+
+early_stopping = EarlyStopping(monitor='val_loss', mode='min', patience=20, verbose=1)
+
+check_point = ModelCheckpoint(
+    filepath = modelpath,
+    # save_weights_only=True,
+    save_best_only=True,
+    monitor='val_loss',
+    verbose=1
+)
+
+hist = model.fit_generator(
+    xy_train, #train 안에 x, y의 데이터를 모두 가지고 있다
+    steps_per_epoch=len(xy_train),
+    validation_data=(xy_test),
+    validation_steps=len(xy_test),
+    epochs=150,
+    verbose=1,
+    callbacks=[reduce_lr, early_stopping, check_point]
+)
 
 #4. 평가, 예측
 loss, acc = model.evaluate(xy_test)
@@ -62,8 +112,7 @@ print("loss : ", loss)
 print("acc : ", acc)
 
 y_pred = model.predict(predict)
-# print("y_pred : ", y_pred)
-# print(y_pred.shape)
+print("y_pred : ", y_pred)
 
 import matplotlib.pyplot as plt
 
@@ -88,15 +137,10 @@ for i in range(len(predict[0])):
     ax = fig.add_subplot(rows, cols, i+1)
     ax.imshow(predict[0][i])
     label = printIndex(y_pred, i)
-    # print(label)
+    print(label)
     ax.set_xlabel(label)
     ax.set_xticks([]), ax.set_yticks([])
 plt.show()
 
-# loss :  0.16194841265678406
-# acc :  0.9437500238418579
-
-# --------------------------------
-
-# loss :  0.42872729897499084
+# loss :  0.4521673619747162
 # acc :  0.8423076868057251

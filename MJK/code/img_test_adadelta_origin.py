@@ -35,7 +35,6 @@ xy_train = train_datagen.flow_from_directory(
     # save_to_dir='./data/img/data1_2/train' #전환된 이미지 데이터 파일을 이미지 파일로 저장
 ) 
 
-# x=(150,150,1), train 폴더안에는 ad/normal이 들어있다. y - ad:0, normal:1
 
 xy_test = test_datagen.flow_from_directory(
    './MJK/data/test',
@@ -73,8 +72,11 @@ model.add(Dense(4, activation='softmax'))
 model.summary()
 
 #3. 컴파일, 훈련
-modelpath = "D:/ImgDetection/MJK/data/weight/cp-rmsprop-{epoch:02d}-{val_loss:4f}.hdf5"  
-model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics =['acc'])
+from tensorflow.keras.optimizers import Adam, Adadelta, Adamax, Adagrad
+from tensorflow.keras.optimizers import RMSprop, SGD, Nadam
+modelpath = "D:/ImgDetection/MJK/data/weight/cp-adadelta-{epoch:02d}-{val_loss:4f}.hdf5"  
+model.compile(loss='categorical_crossentropy', optimizer=Adadelta(learning_rate=0.1), metrics =['acc'])
+
 from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau, ModelCheckpoint
 
 reduce_lr = ReduceLROnPlateau(
@@ -140,15 +142,6 @@ for i in range(len(predict[0])):
     ax.set_xticks([]), ax.set_yticks([])
 plt.show()
 
-# loss :  0.16894356906414032
-# acc :  0.918749988079071
 
-
-# adam
-# loss :  0.6471794843673706
-# acc :  0.7384615540504456
-
-
-# rmsprop
-# loss :  0.4521673619747162
-# acc :  0.8423076868057251
+# loss :  0.8426285982131958
+# acc :  0.6692307591438293

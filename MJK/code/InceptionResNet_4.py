@@ -68,9 +68,12 @@ model.add(Dense(4, activation = 'softmax'))
 
 #3. 컴파일, 훈련
 # model = load_model('./MJK/data/weight/cp_inc-33-0.115449.hdf5')
-modelpath = "D:/ImgDetection/MJK/data/weight/cp_adam_inc-{epoch:02d}-{val_loss:4f}.hdf5"  
+from tensorflow.keras.optimizers import Adam, Adadelta, Adamax, Adagrad
+from tensorflow.keras.optimizers import RMSprop, SGD, Nadam
 
-model.compile(loss='categorical_crossentropy', optimizer='adam', metrics =['acc'])
+modelpath = "D:/ImgDetection/MJK/data/weight/cp_inc_rmsprop-{epoch:02d}-{val_loss:4f}.hdf5"  
+
+model.compile(loss='categorical_crossentropy', optimizer=RMSprop(learning_rate=0.001), metrics =['acc'])
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
 
 reduce_lr = ReduceLROnPlateau(
@@ -147,3 +150,7 @@ plt.show()
 # adam
 # loss :  0.5558212995529175
 # acc :  0.7538461685180664
+
+#RMSprop(0.001)
+# loss :  0.5510021448135376
+# acc :  0.7692307829856873
