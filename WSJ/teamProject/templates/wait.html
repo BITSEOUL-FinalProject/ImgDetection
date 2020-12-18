@@ -1,0 +1,26 @@
+<html lang=ko>
+  <head>
+  <meta charset=utf-8>
+    <title>HTML</title>
+    <h2>로딩중</h2>
+  </head>
+  <body>
+    <table>
+      <tr>
+      <td>
+        {{ name[0] }}
+      </td>
+    </tr>
+    <tr>
+      <td>
+        {{ name[1] }}
+      </td>
+    </tr>
+    </table>
+        <form action = "http://127.0.0.1:5000/fileShow" method = "POST" enctype = "application/x-www-form-urlencoded">       
+        <input type="hidden" id="fileName" name="fileName" value={{ name[0] }}>            
+        <input type="hidden" id="time" name="time" value={{ name[1] }}>            
+        <input type = "submit" value="."/>                
+    </form>
+  </body>
+</html>

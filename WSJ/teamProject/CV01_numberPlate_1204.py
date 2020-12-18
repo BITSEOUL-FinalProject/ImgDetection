@@ -7,7 +7,7 @@ plt.style.use("dark_background")
 
 
 # 인풋이미지 읽기
-img_car = cv2.imread("D:\\ImgDetection\\WSJ\\teamProject\\images2\\0\\916.jpg")
+img_car = cv2.imread("./data/images/333.jpg")
 print(img_car.shape) # (626, 940, 3)
 
 # 이미지의 높이, 너비, 채널을 구한다.
@@ -23,12 +23,11 @@ gray_img = cv2.cvtColor(img_car,cv2.COLOR_BGR2GRAY)
 # 이미지를 그레이색으로 바꾸기
 # 이미지를 그래이색으로 바꾸더라도 show에서 cmap=gray를 안하면 회색으로 안나옴
 # print(gray_img.shape) # (626, 940)
-plt.figure(figsize=(12,10))
-plt.imshow(gray_img,cmap="gray") 
-print(gray_img.shape)
+# plt.figure(figsize=(12,10))
+# plt.imshow(gray_img,cmap="gray") 
 # 여기서 cmap=gray하면 회색으로 변함
-plt.show()
-'''
+# plt.show()
+
 # 쓰레쉬홀딩 할꺼임
 # Adaptive Thresholding
 
@@ -273,7 +272,7 @@ for i, matched_chars in enumerate(matched_result):
     plt.imshow(img_cropped, cmap='gray')
     plt.show()
 
-'''
+
 
 
 

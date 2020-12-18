@@ -1,4 +1,3 @@
-
 import urllib
 from bs4 import BeautifulSoup as bs
 from urllib.parse import urlencode, quote_plus, unquote

@@ -62,7 +62,10 @@ FilePath = './teamProject/video/ss.mp4'
 
 #Open the File
 movie = cv2.VideoCapture(FilePath) #동영상 핸들 얻기
-
+width = movie.get(cv2.CAP_PROP_FRAME_WIDTH) # 또는 movie.get(3)
+height = movie.get(cv2.CAP_PROP_FRAME_HEIGHT) # 또는 movie.get(4)
+fps = movie.get(cv2.CAP_PROP_FPS) # 또는 movie.get(4)
+print('프레임 너비: %d, 프레임 높이: %d, 초당 프레임 수: %d' %(width, height, fps))
 #Check that the file is opened
 if movie.isOpened() == False: #동영상 핸들 확인
     print('Can\'t open the File' + (FilePath))
@@ -73,7 +76,7 @@ if movie.isOpened() == False: #동영상 핸들 확인
 while True:
     #카메라로 부터 사진 한장 읽기 
     ret, frame = movie.read()
-
+    
     # 얼굴 검출 시도 
     try:
         image, face, x, y = face_detector(frame)
