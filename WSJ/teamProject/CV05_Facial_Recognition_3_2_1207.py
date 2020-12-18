@@ -35,18 +35,18 @@ def face_detector(img, size = 0.5):
     rr = [] 
     xx = []   
     yy = []   
-    try:  
-        if faces[1] is not None:
-            for j in range(len(faces)):
-                for(x,y,w,h) in [faces[j]]:
-                    cv2.rectangle(img, (x,y),(x+w,y+h),(0,255,255),2)
-                    roi = img[y:y+h, x:x+w]
-                    roi = cv2.resize(roi, (200,200))
-                    rr.append(roi)
-                    xx.append(x)
-                    yy.append(y)                    
-            return img,rr,xx,yy 
-    except:
+
+    if len(faces) > 1:
+        for j in range(len(faces)):
+            for(x,y,w,h) in [faces[j]]:
+                cv2.rectangle(img, (x,y),(x+w,y+h),(0,255,255),2)
+                roi = img[y:y+h, x:x+w]
+                roi = cv2.resize(roi, (200,200))
+                rr.append(roi)
+                xx.append(x)
+                yy.append(y)                    
+        return img,rr,xx,yy 
+    else:
         for(x,y,w,h) in faces:
             cv2.rectangle(img, (x,y),(x+w,y+h),(0,255,255),2)
             roi = img[y:y+h, x:x+w]
@@ -59,7 +59,7 @@ def face_detector(img, size = 0.5):
 # ==================================================================================
 
 #파일 경로
-FilePath = './teamProject/video/s3.mp4'
+FilePath = './teamProject/video/startup.mp4'
 
 #Open the File
 movie = cv2.VideoCapture(FilePath) #동영상 핸들 얻기
@@ -92,28 +92,27 @@ while True:
             face[0] = cv2.cvtColor(face[0], cv2.COLOR_BGR2GRAY)
             face = np.array(face)
         
-        face = face.reshape(face.shape[0],100,100,4)
+        face = face.reshape(face.shape[0],200,200,1)
 
 
         #학습한 모델로 예측시도
         result = model.predict(face)
-        try: 
-            if result[1] is not None:
-                bss1 = []
-                for i in range(len(result)):
-                    if result[i] <= 0.1:
-                        bss1.append([cv2.putText(image, "B", (x[i], y[i]), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 2)])
+        
+        if len(result) > 1:
+            bss1 = []
+            for i in range(len(result)):
+                if result[i] <= 0.1:
+                    bss1.append([cv2.putText(image, "B", (x[i], y[i]), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 2)])
 
-                    elif result[i] >= 0.9 :
-                        bss1.append([cv2.putText(image, "N", (x[i], y[i]), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 2)])
+                elif result[i] >= 0.9 :
+                    bss1.append([cv2.putText(image, "N", (x[i], y[i]), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 2)])
 
-                    else:
-                        bss1.append([cv2.putText(image, "U", (x[i], y[i]), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 0, 255), 2)])
-
-                        
-                bss1[:]
-                cv2.imshow('Face Cropper', image)        
-        except:
+                else:
+                    bss1.append([cv2.putText(image, "U", (x[i], y[i]), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 0, 255), 2)])
+ 
+            bss1[:]
+            cv2.imshow('Face Cropper', image)        
+        else:
             if result <= 0.1:
                 cv2.putText(image, "B", (x, y), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 2)
                 cv2.imshow('Face Cropper', image)
@@ -129,7 +128,7 @@ while True:
         cv2.imshow('Face Cropper', image)
         pass
 
-    if cv2.waitKey(1)==13:
+    if cv2.waitKey(2)==13:
         break
 movie.release()
 cv2.destroyAllWindows()

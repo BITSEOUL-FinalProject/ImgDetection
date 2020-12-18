@@ -1,0 +1,45 @@
+<html lang=ko>
+  <head>
+  <meta charset=utf-8>
+    <title>HTML</title>
+    <style>
+      video { max-width: 600; display: block; margin: 20px auto; }
+    </style>
+  </head>
+  <body>
+    <table align="center">
+      <tr>
+        <td align="center" colspan="3" >
+          <video muted autoplay loop>
+            <source src="{{url_for('static', filename='2video2.mp4' )}}" type="video/mp4">
+          </video>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <video muted autoplay loop>
+            <source src="{{url_for('static', filename='op2_video2.mp4' )}}" type="video/mp4">
+          </video>
+        </td>
+        
+        <td>
+          <video muted autoplay loop>
+            <source src="{{url_for('static', filename='cv2_video2.mp4' )}}" type="video/mp4">
+          </video>
+        </td>
+        <td>
+          <video muted autoplay loop>
+            <source src="{{url_for('static', filename='wooseokfuck.mp4' )}}" type="video/mp4">
+          </video>
+        </td>
+      </tr>
+      <tr>
+        <td align="center">
+          <h1>Haarcascade</h3>
+        </td>
+        <td align="center"><h1>CVlib</h3></td>
+        <td align="center"><h1>Dlib</h3></td>
+      </tr>
+    </table>
+  </body>
+</html>
