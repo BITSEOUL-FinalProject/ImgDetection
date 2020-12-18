@@ -5,89 +5,48 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import matplotlib.patheffects as path_effects
 
-
 detector = dlib.get_frontal_face_detector()
-sp = dlib.shape_predictor('./project/models/shape_predictor_68_face_landmarks.dat')
-facerec = dlib.face_recognition_model_v1('./project/models/dlib_face_recognition_resnet_model_v1.dat')
+predictor = dlib.shape_predictor('./MJK/data/photo/shape_predictor_68_face_landmarks.dat')
+facerec = dlib.face_recognition_model_v1('./MJK/data/photo/dlib_face_recognition_resnet_model_v1.dat')
 
 def find_faces(img):
-    dets = detector(img, 1)
-
-    if len(dets) == 0:
+    dets = detector(img, 1) #찾은 얼굴들
+    if len(dets) == 0: #못찾으면
         return np.empty(0), np.empty(0), np.empty(0)
 
-
     rects, shapes = [], []
-    shapes_np = np.zeros((len(dets), 68, 2), dtype=np.int)
-    for k, d in enumerate(dets):
-        rect = ((d.left(), d.top()), (d.right(), d.bottom()))
+    shapes_np = np.zeros((len(dets), 68, 2), dtype=np.int) 
+    for k, d in enumerate(dets): #얼굴을 찾았다면 갯수만큼 루프
+        rect = ((d.left(), d.top()), (d.right(), d.bottom())) #얼굴 왼쪽 위 오른쪽 아래
         rects.append(rect)
-
-        shape = sp(img, d)
-
+        shape = predictor(img, d)
          
-        # 넘파이 배열로 쉐이프 리턴
-        for i in range(0, 68):
+        for i in range(0, 68): #랜드마크 생성
             shapes_np[k][i] = (shape.part(i).x, shape.part(i).y)
 
         shapes.append(shape)    
     return rects, shapes, shapes_np
 
-def encode_faces(img, shapes):
+def encode_faces(img, shapes): #얼굴 인코드 -> 랜드마크 정보를 토대로 인코더에 넣어주게 되면 128개의 벡터로 변환됨(벡터의 특징들로 얼굴을 검출)
     face_descriptors = []
     for shape in shapes:
-        face_descriptor = facerec.compute_face_descriptor(img, shape)
+        face_descriptor = facerec.compute_face_descriptor(img, shape) #전체이미지와 랜드마크 결과가 저장
         face_descriptors.append(np.array(face_descriptor))
-
     return np.array(face_descriptors)
-
  
 # 이미지 등록
-
-# find_namelist = np.load('./project/imgtest/find_namelist.npy', allow_pickle=True)
-
-# img_paths = {}
-# # descs = {}
-# for i in range(len(find_namelist)): 
-#     img_paths[i] = './project/imgtest/'+str(i)+ '/' + str(i)+ '.jpg'
-#     # descs[i] = None
-# print(img_paths)
-
-
 img_paths = {
-    'suzy': './img/suzy.jpg',
-    'juhyuk': './img/juhyuk.jpg',
-    'hanna': './img/hanna.png',
-    'sunho': './img/sunho.png'
+    'suzi': './MJK/data/photo/0/suzi.jpg',
+    'juhyuk': './MJK/data/photo/1/juhyuk.jpg',
+    'sunho': './MJK/data/photo/2/sunho.jpg',
+    'hanna': './MJK/data/photo/3/hanna.jpg'
 }
-# print(img_paths.items())
-    
-# descs = {
-#     'neo': None,
-#     'trinity': None,
-#     'morpheus': None,
-#     'smith': None
-# }
-
+# 계산할 결과를 저장할 공간을 설정
 descs = {
-    'suzy': None,
+    'suzi': None,
     'juhyuk': None,
-    'hanna': None,
-    'sunho': None
-    # '4': None,
-    # '5': None,
-    # '6': None,
-    # '7': None,
-    # '8': None,
-    # '9': None,
-    # '10': None,
-    # '11': None,
-    # '12': None,
-    # '13': None,
-    # '14': None,
-    # '15': None,
-    # '16': None,
-    # '17': None
+    'sunho': None,
+    'hanna': None 
 }
 
 for name, img_path in img_paths.items():
@@ -96,22 +55,18 @@ for name, img_path in img_paths.items():
 
     _, img_shapes, _ = find_faces(img_rgb)
     descs[name] = encode_faces(img_rgb, img_shapes)[0]
-    print(descs[name])
+    # print(descs[name])
 
+np.save('./MJK/data/photo/startup.npy', descs)
+print(len(descs['suzi']))  
 
-np.save('./img/startup2.npy', descs)
-print(descs)  
-
-
+'''
 # 검증 사진 인풋 부분    
-img_bgr = cv2.imread('./img/123.jpg')
+img_bgr = cv2.imread('./MJK/data/photo/11.jpg')
 img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
 
 rects, shapes, _ = find_faces(img_rgb)
 descriptors = encode_faces(img_rgb, shapes)
-
-# descs = np.load('./img/descs.npy', allow_pickle=True)
-# descs = np.load('./img/descs.npy')
 
 # 결과 출력
 fig, ax = plt.subplots(1, figsize=(20, 20))
@@ -147,5 +102,5 @@ for i, desc in enumerate(descriptors):
         ax.add_patch(rect)
 
 plt.axis('off')
-# plt.savefig('./project/result_Img/startup_Output3.png')
 plt.show()
+'''

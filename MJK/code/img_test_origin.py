@@ -31,12 +31,12 @@ pred_datagen = ImageDataGenerator(rescale=1./255.)
 xy_train = train_datagen.flow_from_directory(
     './MJK/data/train', #폴더 위치 
     target_size=(200,200), #이미지 크기 설정 - 기존 이미지보다 크게 설정하면 늘려준다 
-    batch_size=64, 
-    class_mode='categorical' #클래스모드는 찾아보기!  
-    # save_to_dir='./data/img/data1_2/train' #전환된 이미지 데이터 파일을 이미지 파일로 저장
+    batch_size=1, 
+    class_mode='categorical', #클래스모드는 찾아보기!  
+    # save_to_dir='./MJK/data/gen/train' #전환된 이미지 데이터 파일을 이미지 파일로 저장
 ) 
 
-# x=(150,150,1), train 폴더안에는 ad/normal이 들어있다. y - ad:0, normal:1
+# # x=(150,150,1), train 폴더안에는 ad/normal이 들어있다. y - ad:0, normal:1
 
 xy_test = test_datagen.flow_from_directory(
    './MJK/data/test',
@@ -150,4 +150,4 @@ plt.show()
 
 # rmsprop
 # loss :  0.4521673619747162
-# acc :  0.8423076868057251
+# acc :  0.8523076868057251

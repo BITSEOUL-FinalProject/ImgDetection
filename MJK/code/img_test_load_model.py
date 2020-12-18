@@ -48,7 +48,7 @@ xy_test = test_datagen.flow_from_directory(
 predict = pred_datagen.flow_from_directory(
     './MJK/data/pred', 
     target_size=(200,200),
-    batch_size=50,  
+    batch_size=55,  
     class_mode=None,
     shuffle=False,
 )
